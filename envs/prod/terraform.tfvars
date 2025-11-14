@@ -1,0 +1,10 @@
+project_id        = "health-patient-prod"
+name_prefix       = "health-patient-prod"
+region            = "us-central1"
+zone              = "us-central1-a"
+kms_key_name      = "projects/my-org/locations/us/keyRings/patient-kr/cryptoKeys/patient-cmk"
+db_root_password  = "REPLACE_WITH_SECURE_PASSWORD_OR_SECRET_MANAGER_REFERENCE"
+bucket_admins     = ["serviceAccount:sa-backup@health-patient-prod.iam.gserviceaccount.com"]
+access_policy_id  = "REPLACE_WITH_ORG_ACCESS_POLICY_ID"
+binauth_attestor_pubkey = "" # fill with PEM if you have one
+cloudrun_service_account = "sa-cloudrun-patient-api@health-patient-prod.iam.gserviceaccount.com"

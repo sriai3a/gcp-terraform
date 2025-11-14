@@ -1,0 +1,52 @@
+steps:
+# 1. build image and push to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: Build
+  args:
+  - 'build'
+  - '-t'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/patient-artifacts/patient-api:$SHORT_SHA'
+  - '.'
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: Push
+  args:
+  - 'push'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/patient-artifacts/patient-api:$SHORT_SHA'
+
+# 2. create an attestation (example uses gcloud; requires a local signing key or KMS)
+# This is a placeholder — in real deployments, use KMS or Cloud Build signing integration (or use Cosign/Fulcio Sigstore)
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Attest
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      echo "Creating attestation for image..."
+      PROJECT=$PROJECT_ID
+      IMAGE="us-central1-docker.pkg.dev/$PROJECT/patient-artifacts/patient-api:$SHORT_SHA"
+
+      # Example using gcloud attest (requires proper attestor and signing configuration)
+      # Replace ATTESTOR_NAME with your attestor resource and configure signing key (KMS-based) or manual key.
+      ATTESTOR_NAME="projects/$PROJECT/attestors/patient-attestor"
+      gcloud beta container binauthz attestations create \
+        --artifact-url="$IMAGE" \
+        --attestor="$ATTESTOR_NAME" \
+        --attestor-project="$PROJECT" \
+        --note="projects/$PROJECT/notes/patient-attestor-note" \
+        --signature-file="" || echo "Attestation step placeholder - replace with your attestor workflow"
+
+# 3. (Optional) trigger a deployment step to Cloud Run via Cloud Build service account (requires run.admin and serviceAccountUser)
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Deploy
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud run deploy patient-api \
+        --project=$PROJECT_ID \
+        --region=us-central1 \
+        --image=us-central1-docker.pkg.dev/$PROJECT_ID/patient-artifacts/patient-api:$SHORT_SHA \
+        --service-account=${CLOUDRUN_SA} \
+        --no-allow-unauthenticated \
+        --vpc-connector=${VPC_CONNECTOR_NAME}
