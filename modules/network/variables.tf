@@ -13,4 +13,7 @@ variable "shared_vpc_host" {
   type = bool
   default = false
 }
-variable "enable_private_google_access" { type = bool; default = true }
+variable "enable_private_google_access" { 
+  type = bool
+  default = true
+}

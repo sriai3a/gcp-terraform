@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "subnets" {
   ip_cidr_range = each.value.cidr
   private_ip_google_access = var.enable_private_google_access
   description   = coalesce(each.value.description, "Subnet ${each.key}")
-  enable_flow_logs = true # helpful for auditing (cost/retention must be managed)
+  # enable_flow_logs = true # helpful for auditing (cost/retention must be managed)
   log_config {
     aggregation_interval = "INTERVAL_5_SEC"
     flow_sampling        = 0.5
